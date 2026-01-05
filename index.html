@@ -74,10 +74,30 @@
         .question-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; flex-shrink: 0;}
         .q-text { font-family: 'Merriweather', serif; font-size: 1.2rem; line-height: 1.6; color: var(--bg-deep); margin-bottom: 20px; border-left: 5px solid var(--primary); padding-left: 15px; }
         .options-grid { display: flex; flex-direction: column; gap: 12px; }
-        .option-item { padding: 15px; border: 2px solid #ced6e0; border-radius: 10px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: flex-start; font-size: 1.05rem; }
+        
+        .option-item { 
+            padding: 15px; 
+            border: 2px solid #ced6e0; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            background: white; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; /* Đẩy chữ và icon ra 2 bên */
+            font-size: 1.05rem; 
+        }
         .option-item:hover { border-color: var(--primary); background: #f1fcff; }
         .option-item.selected { background: var(--bg-ocean); color: white; border-color: var(--bg-ocean); }
-        .badge { width: 28px; height: 28px; background: #dfe4ea; color: #2f3542; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; margin-top: 2px; }
+        
+        .badge { 
+            width: 28px; height: 28px; 
+            background: #dfe4ea; color: #2f3542; 
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-weight: bold; margin-right: 15px; 
+            flex-shrink: 0; 
+        }
         .option-item.selected .badge { background: var(--primary); color: white; }
 
         .toolbar { margin-top: auto; display: flex; justify-content: space-between; padding-top: 10px; flex-wrap: wrap; gap: 10px; }
@@ -120,7 +140,7 @@
             .header { height: auto; padding: 10px 15px; flex-wrap: wrap; gap: 5px; }
             .header-title { width: 100%; text-align: center; order: 2; margin-top: 5px; }
             .header-title h1 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-            .header-title p { display: none; } /* Ẩn dòng phụ trên mobile cho gọn */
+            .header-title p { display: none; } 
             .timer-wrap { width: 100%; text-align: center; order: 1; }
             .timer-display { font-size: 1.5rem; }
 
@@ -130,7 +150,7 @@
             /* Content Area Mobile */
             .content-area { 
                 flex: 1; padding: 15px; 
-                padding-bottom: 10px; /* Chừa chỗ cho sidebar dưới */
+                padding-bottom: 10px; 
             }
             .question-card { padding: 20px; margin-bottom: 15px; }
             .q-text { font-size: 1.1rem; margin-bottom: 15px; }
@@ -142,14 +162,14 @@
             /* Sidebar Mobile (Bottom Panel) */
             .sidebar {
                 width: 100%; max-width: none; border-left: none; border-top: 2px solid var(--primary);
-                height: 35vh; /* Chiếm 35% màn hình dưới */
+                height: 35vh; 
                 padding: 10px 15px;
-                flex: none; /* Không co giãn */
+                flex: none; 
             }
             .student-card { padding: 8px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
             .student-card div { margin-bottom: 0 !important; font-size: 0.9rem; }
             
-            .q-grid { grid-template-columns: repeat(8, 1fr); gap: 5px; } /* Grid nhỏ hơn, nhiều cột hơn */
+            .q-grid { grid-template-columns: repeat(8, 1fr); gap: 5px; } 
             .grid-cell { font-size: 0.8rem; }
             
             .btn-submit { padding: 12px; margin-top: 5px; font-size: 1rem; }
@@ -263,17 +283,20 @@
     </div>
 
     <script>
-        // ========= CẤU HÌNH KEY CỦA BẠN =========
+        // ========= CẤU HÌNH KEY EMAILJS =========
         const EMAILJS_PUBLIC_KEY = "doXY7ihRmO41tP-M7";
         const EMAILJS_SERVICE_ID = "service_zqm8peo";
         const EMAILJS_TEMPLATE_ID = "template_t4y3jxa";
 
         // Khởi tạo EmailJS
-        try {
-            if(typeof emailjs !== 'undefined') {
-                emailjs.init(EMAILJS_PUBLIC_KEY);
-            }
-        } catch(e) { console.warn("Lỗi EmailJS:", e); }
+        (function(){
+            try {
+                if(typeof emailjs !== 'undefined') {
+                    emailjs.init(EMAILJS_PUBLIC_KEY);
+                    console.log("EmailJS Ready!");
+                }
+            } catch(e) { console.warn("Lỗi EmailJS:", e); }
+        })();
         // ============================================
 
         const sourceData = [
@@ -335,6 +358,8 @@
 
         function createBubbles() {
             const container = document.getElementById('bubble-container');
+            if(!container) return;
+            container.innerHTML = '';
             for(let i=0; i<15; i++){
                 let b = document.createElement('div');
                 b.className = 'bubble';
@@ -371,7 +396,6 @@
             document.getElementById('disp-name').innerText = studentName;
             document.getElementById('disp-mssv').innerText = studentID;
             
-            // Thêm nút Nộp bài vào sidebar
             let sidebar = document.querySelector('.sidebar');
             let oldBtn = document.querySelector('.btn-submit');
             if(oldBtn) oldBtn.remove();
@@ -394,26 +418,53 @@
         }
 
         function loadQuestion(idx) {
-            currentQIndex = idx; let qData = examData[idx];
+            currentQIndex = idx; 
+            let qData = examData[idx];
             document.getElementById('q-content').innerText = `Câu ${idx+1}: ${qData.q}`;
-            let container = document.getElementById('q-options'); container.innerHTML = '';
+            let container = document.getElementById('q-options'); 
+            container.innerHTML = '';
             
             qData.options.forEach((opt, optIdx) => {
-                let div = document.createElement('div'); div.className = 'option-item';
+                let div = document.createElement('div'); 
+                div.className = 'option-item';
+                
+                // ĐÃ SỬA: Dùng thẻ span flex:1 để đẩy chữ không bị mất
+                let contentHTML = `<div class="badge">${String.fromCharCode(65+optIdx)}</div> <span style="flex: 1; margin-right: 10px; text-align: left;">${opt.txt}</span>`;
+                
                 if(userAnswers[idx] === optIdx) div.classList.add('selected');
+                
                 if(isReviewing) {
                     div.style.pointerEvents = 'none';
-                    if(opt.isCorrect) { div.style.border = "2px solid #2ed573"; div.style.background = "rgba(46, 213, 115, 0.1)"; div.innerHTML += ' <i class="fas fa-check" style="color:#2ed573; margin-left:auto;"></i>'; }
-                    if(userAnswers[idx] === optIdx && !opt.isCorrect) { div.style.border = "2px solid #ff4757"; div.style.background = "rgba(255, 71, 87, 0.1)"; div.innerHTML += ' <i class="fas fa-times" style="color:#ff4757; margin-left:auto;"></i>'; }
-                } else { div.onclick = () => selectAnswer(idx, optIdx); }
-                div.innerHTML = `<div class="badge">${String.fromCharCode(65+optIdx)}</div> ${div.innerHTML || opt.txt}`;
+                    if(opt.isCorrect) { 
+                        div.style.border = "2px solid #2ed573"; 
+                        div.style.background = "rgba(46, 213, 115, 0.1)"; 
+                        contentHTML += ' <i class="fas fa-check" style="color:#2ed573; font-size: 1.2rem;"></i>'; 
+                    }
+                    if(userAnswers[idx] === optIdx && !opt.isCorrect) { 
+                        div.style.border = "2px solid #ff4757"; 
+                        div.style.background = "rgba(255, 71, 87, 0.1)"; 
+                        contentHTML += ' <i class="fas fa-times" style="color:#ff4757; font-size: 1.2rem;"></i>'; 
+                    }
+                } else { 
+                    div.onclick = () => selectAnswer(idx, optIdx); 
+                }
+
+                div.innerHTML = contentHTML;
                 container.appendChild(div);
             });
+
             document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('current'));
-            document.getElementById(`cell-${idx}`).classList.add('current');
+            let curCell = document.getElementById(`cell-${idx}`);
+            if(curCell) curCell.classList.add('current');
+            
             let btnF = document.getElementById('btn-flag');
-            if(flagged.has(idx)) { btnF.classList.add('active'); btnF.innerHTML = '<i class="fas fa-flag"></i> Bỏ cờ'; } 
-            else { btnF.classList.remove('active'); btnF.innerHTML = '<i class="fas fa-flag"></i> Cắm cờ'; }
+            if(flagged.has(idx)) { 
+                btnF.classList.add('active'); 
+                btnF.innerHTML = '<i class="fas fa-flag"></i> Bỏ cờ'; 
+            } else { 
+                btnF.classList.remove('active'); 
+                btnF.innerHTML = '<i class="fas fa-flag"></i> Cắm cờ'; 
+            }
         }
 
         function selectAnswer(qIdx, oIdx) {
@@ -443,9 +494,9 @@
             document.addEventListener('contextmenu', e => e.preventDefault());
             document.addEventListener('fullscreenchange', () => {
                 if(!document.fullscreenElement && !isReviewing) {
-                    let msg = new SpeechSynthesisUtterance("Bạn đang thoát khỏi chế độ màn hình, cần quay lại kì thi");
+                    let msg = new SpeechSynthesisUtterance("Cảnh báo. Bạn đang thoát khỏi chế độ thi.");
                     msg.lang = 'vi-VN'; window.speechSynthesis.speak(msg);
-                    showAlert("Bạn đang thoát khỏi chế độ màn hình, cần quay lại kì thi");
+                    showAlert("Hệ thống phát hiện bạn rời khỏi màn hình thi!");
                     document.getElementById('alert-btn').onclick = function() { document.documentElement.requestFullscreen(); closeAlert(); }
                 }
             });
@@ -456,53 +507,61 @@
         function showAlert(msg) { document.getElementById('alert-msg').innerText = msg; document.getElementById('popup-alert').style.display = 'flex'; }
         function closeAlert() { document.getElementById('popup-alert').style.display = 'none'; }
 
+        // ============================================
+        // HÀM KẾT THÚC THI & GỬI EMAIL TỰ ĐỘNG
+        // ============================================
         function finishExam(auto=false) {
-            clearInterval(timerInterval); closeConfirm();
+            clearInterval(timerInterval); 
+            closeConfirm();
             if(document.fullscreenElement) document.exitFullscreen();
 
             let correctCount = 0;
             examData.forEach((q, idx) => {
-                if(userAnswers[idx] !== undefined) { if(q.options[userAnswers[idx]].isCorrect) correctCount++; }
+                if(userAnswers[idx] !== undefined) { 
+                    if(q.options[userAnswers[idx]].isCorrect) correctCount++; 
+                }
             });
             let score = (correctCount * 0.2).toFixed(2);
             
             document.getElementById('exam-screen').style.display = 'none';
             document.getElementById('result-screen').style.display = 'flex';
             document.getElementById('final-score').innerText = score;
-
             startFireworks(score);
             
-            // GỬI MAIL
+            // XỬ LÝ GỬI EMAIL
             const statusBox = document.getElementById('mail-status');
-            statusBox.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-sync fa-spin"></i> Đang tự động gửi kết quả...</span>';
+            statusBox.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-sync fa-spin"></i> Đang đồng bộ kết quả về hệ thống...</span>';
+
+            let timeNow = new Date().toLocaleString('vi-VN');
+            let detailMsg = `HỆ THỐNG THI TRẮC NGHIỆM - KẾT QUẢ\n\n` +
+                            `Thí sinh: ${studentName}\n` +
+                            `MSSV: ${studentID}\n` +
+                            `Thời gian nộp: ${timeNow}\n` +
+                            `--------------------------\n` +
+                            `SỐ CÂU ĐÚNG: ${correctCount}/50\n` +
+                            `TỔNG ĐIỂM: ${score}\n` +
+                            `--------------------------\n` +
+                            `Hệ thống tự động ghi nhận kết quả.`;
+
+            let params = {
+                to_email: studentEmail,             
+                cc_email: "huakhaitrieustvol@gmail.com", 
+                name: studentName,
+                mssv: studentID,
+                score: score,
+                message: detailMsg
+            };
 
             if(typeof emailjs !== 'undefined') {
-                let messageContent = `CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH BÀI THI\n\n` +
-                                     `Họ và tên thí sinh: ${studentName}\n` +
-                                     `Mã số sinh viên: ${studentID}\n` +
-                                     `---------------------------------\n` +
-                                     `SỐ ĐIỂM CỦA BẠN LÀ: ${score} ĐIỂM\n` +
-                                     `---------------------------------\n` +
-                                     `Thời gian nộp bài: ${new Date().toLocaleString('vi-VN')}`;
-
-                let params = {
-                    to_email: studentEmail,
-                    cc_email: "huakhaitrieustvol@gmail.com", 
-                    name: studentName,
-                    mssv: studentID,
-                    score: score,
-                    message: messageContent
-                };
-
                 emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
                     .then(function(response) {
-                        statusBox.innerHTML = '<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Đã gửi kết quả thành công!</span>';
+                        statusBox.innerHTML = '<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Đã gửi kết quả về Email thành công!</span>';
                     }, function(error) {
                         console.log('FAILED...', error);
-                        statusBox.innerHTML = `<span style="color:var(--danger)"><i class="fas fa-exclamation-triangle"></i> Lỗi gửi mail: ${JSON.stringify(error)}</span>`;
+                        statusBox.innerHTML = `<span style="color:var(--danger)"><i class="fas fa-exclamation-triangle"></i> Lỗi gửi mail. Vui lòng chụp màn hình!</span>`;
                     });
             } else {
-                statusBox.innerHTML = '<span style="color:var(--danger)">Không có kết nối mạng để gửi mail.</span>';
+                statusBox.innerHTML = '<span style="color:var(--danger)"><i class="fas fa-wifi"></i> Mất kết nối mạng. Không thể gửi mail.</span>';
             }
         }
 
@@ -543,7 +602,8 @@
             let particles = [];
             
             if(score < 5) {
-                document.getElementById('res-msg').innerText = "RẤT TIẾC, BẠN CHƯA ĐẠT YÊU CẦU"; document.getElementById('res-msg').style.color = "#ccc";
+                document.getElementById('res-msg').innerText = "KẾT QUẢ CHƯA ĐẠT YÊU CẦU"; 
+                document.getElementById('res-msg').style.color = "#ccc";
                 function Drop() { this.x = Math.random() * canvas.width; this.y = Math.random() * -canvas.height; this.dy = Math.random() * 5 + 2; this.draw = function() { ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x, this.y + 10); ctx.strokeStyle = '#a4b0be'; ctx.stroke(); }; this.update = function() { this.y += this.dy; if(this.y > canvas.height) this.y = -10; } }
                 for(let i=0; i<100; i++) particles.push(new Drop());
                 function animateRain() { requestAnimationFrame(animateRain); ctx.clearRect(0,0,canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); }
