@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HỆ THỐNG THI TRẮC NGHIỆM - TRIEU TREM</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
@@ -21,75 +21,139 @@
             --success: #2ed573;
         }
 
-        * { box-sizing: border-box; user-select: none; }
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-deep); background-image: radial-gradient(circle at 50% 50%, #0a3d62 0%, #021019 100%); color: var(--text-main); height: 100vh; overflow: hidden; }
-        ::-webkit-scrollbar { width: 8px; }
+        
+        /* Scrollbar đẹp */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg-deep); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
 
+        /* --- BACKGROUND --- */
         .ocean-bg { position: absolute; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
         .bubble { position: absolute; bottom: -50px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; animation: rise linear infinite; }
         @keyframes rise { 0% { transform: translateY(0) translateX(0); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-120vh) translateX(50px); opacity: 0; } }
 
-        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; position: relative; z-index: 2; }
+        /* --- LOGIN SCREEN --- */
+        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; position: relative; z-index: 2; padding: 20px; }
         .brand-corner { position: absolute; top: 20px; left: 20px; font-family: 'Merriweather', serif; font-weight: 700; color: var(--primary); font-size: 1.5rem; text-shadow: 0 0 15px var(--primary); letter-spacing: 2px; }
-        .login-card { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); padding: 40px; border-radius: 20px; width: 450px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 168, 204, 0.1); animation: fadeIn 1s ease-out; }
+        
+        .login-card { 
+            background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); 
+            border: 1px solid var(--glass-border); padding: 40px; border-radius: 20px; 
+            width: 100%; max-width: 450px; text-align: center; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); animation: fadeIn 1s ease-out; 
+        }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .login-card h2 { margin-bottom: 25px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        
+        .login-card h2 { margin-bottom: 25px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; font-size: 1.5rem; }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { display: block; margin-bottom: 5px; color: #a4b0be; font-size: 0.9rem; }
         .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #2f3542; border-radius: 8px; color: white; font-size: 1rem; transition: 0.3s; }
         .input-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(0, 168, 204, 0.3); }
         .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--bg-ocean), var(--primary)); border: 1px solid var(--primary); color: white; font-weight: bold; font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; }
-        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 168, 204, 0.4); }
-
+        
+        /* --- EXAM SCREEN --- */
         #exam-screen { display: none; height: 100vh; flex-direction: column; background: #f1f2f6; color: #2f3542; position: relative; z-index: 10; }
-        .header { background: linear-gradient(to right, var(--bg-deep), var(--bg-ocean)); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; color: white; border-bottom: 4px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        
+        .header { 
+            background: linear-gradient(to right, var(--bg-deep), var(--bg-ocean)); 
+            padding: 0 20px; height: 70px; display: flex; justify-content: space-between; align-items: center; 
+            color: white; border-bottom: 4px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+            flex-shrink: 0;
+        }
         .header-title h1 { font-size: 1.2rem; margin: 0; color: var(--primary); }
         .header-title p { font-size: 0.85rem; margin: 3px 0 0; opacity: 0.8; }
-        .timer-wrap { text-align: right; }
+        .timer-wrap { text-align: right; white-space: nowrap; }
         .timer-display { font-family: 'Courier New', monospace; font-size: 1.8rem; font-weight: bold; color: var(--accent); text-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
         
-        .main-container { display: flex; flex: 1; overflow: hidden; }
-        .content-area { flex: 3; padding: 40px; overflow-y: auto; background: #dfe4ea; }
-        .question-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); min-height: 60%; }
-        .q-text { font-family: 'Merriweather', serif; font-size: 1.2rem; line-height: 1.6; color: var(--bg-deep); margin-bottom: 30px; border-left: 5px solid var(--primary); padding-left: 20px; }
-        .options-grid { display: flex; flex-direction: column; gap: 15px; }
-        .option-item { padding: 15px 20px; border: 2px solid #ced6e0; border-radius: 10px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: center; font-size: 1.05rem; }
+        .main-container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
+        /* Left Content (Question) */
+        .content-area { flex: 3; padding: 30px; overflow-y: auto; background: #dfe4ea; display: flex; flex-direction: column; }
+        .question-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; flex-shrink: 0;}
+        .q-text { font-family: 'Merriweather', serif; font-size: 1.2rem; line-height: 1.6; color: var(--bg-deep); margin-bottom: 20px; border-left: 5px solid var(--primary); padding-left: 15px; }
+        .options-grid { display: flex; flex-direction: column; gap: 12px; }
+        .option-item { padding: 15px; border: 2px solid #ced6e0; border-radius: 10px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: flex-start; font-size: 1.05rem; }
         .option-item:hover { border-color: var(--primary); background: #f1fcff; }
         .option-item.selected { background: var(--bg-ocean); color: white; border-color: var(--bg-ocean); }
-        .badge { width: 30px; height: 30px; background: #dfe4ea; color: #2f3542; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+        .badge { width: 28px; height: 28px; background: #dfe4ea; color: #2f3542; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; margin-top: 2px; }
         .option-item.selected .badge { background: var(--primary); color: white; }
 
-        .toolbar { margin-top: 30px; display: flex; justify-content: space-between; }
-        .btn-tool { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
-        .btn-nav { background: white; border: 1px solid #ced6e0; color: var(--bg-deep); }
-        .btn-nav:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .toolbar { margin-top: auto; display: flex; justify-content: space-between; padding-top: 10px; flex-wrap: wrap; gap: 10px; }
+        .btn-tool { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; font-size: 1rem; }
+        .btn-nav { background: white; border: 1px solid #ced6e0; color: var(--bg-deep); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-nav:hover { background: var(--primary); color: white; }
         .btn-func { background: #f1f2f6; color: #57606f; }
         .btn-func.active { background: var(--accent); color: white; box-shadow: 0 0 10px var(--accent); }
         
+        /* Right Sidebar */
         .sidebar { flex: 1; background: white; border-left: 1px solid #ced6e0; display: flex; flex-direction: column; padding: 20px; max-width: 350px; }
         .student-card { background: linear-gradient(135deg, var(--bg-ocean), var(--bg-deep)); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
         .grid-wrapper { flex: 1; overflow-y: auto; margin-bottom: 20px; }
         .q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-        .grid-cell { aspect-ratio: 1; border: 1px solid #ced6e0; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; position: relative; background: #f1f2f6; transition: 0.2s; }
-        .grid-cell:hover { background: #dfe4ea; }
+        .grid-cell { aspect-ratio: 1; border: 1px solid #ced6e0; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; position: relative; background: #f1f2f6; }
         .grid-cell.current { border: 2px solid var(--primary); font-weight: bold; }
         .grid-cell.answered { background: var(--success); color: white; border-color: var(--success); }
         .grid-cell.flagged::after { content: '\f024'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; top: -5px; right: -5px; color: var(--danger); font-size: 0.8rem; }
-        .btn-submit { width: 100%; padding: 15px; background: var(--danger); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top:10px; }
-        .btn-submit:hover { background: #ff6b81; }
+        
+        .btn-submit { width: 100%; padding: 15px; background: var(--danger); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top: 10px; }
 
-        #result-screen { display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 20; background: var(--bg-deep); color: white; }
-        .score-circle { width: 200px; height: 200px; border-radius: 50%; border: 5px solid var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0, 168, 204, 0.1); margin: 30px 0; box-shadow: 0 0 30px var(--primary); }
+        /* --- RESULT SCREEN --- */
+        #result-screen { display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 20; background: var(--bg-deep); color: white; padding: 20px; }
+        .score-circle { width: 180px; height: 180px; border-radius: 50%; border: 6px solid var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0, 168, 204, 0.1); margin: 30px 0; }
         .score-val { font-size: 3.5rem; font-weight: bold; color: var(--accent); }
         
-        #mail-status { margin-bottom: 20px; font-style: italic; color: var(--primary); font-size: 1.1em; }
-        
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; justify-content: center; align-items: center; }
-        .popup { background: white; color: #333; padding: 30px; border-radius: 15px; width: 350px; text-align: center; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
-        .popup button { margin-top: 20px; padding: 10px 25px; border: none; border-radius: 5px; background: var(--bg-deep); color: white; cursor: pointer; }
+        /* --- POPUP --- */
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; justify-content: center; align-items: center; padding: 20px; }
+        .popup { background: white; color: #333; padding: 25px; border-radius: 15px; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        .popup button { margin-top: 20px; padding: 12px 30px; border: none; border-radius: 8px; background: var(--bg-deep); color: white; cursor: pointer; font-weight: bold; }
         canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+
+        /* ================= MOBILE RESPONSIVE ================= */
+        @media (max-width: 768px) {
+            /* Login */
+            .login-card { padding: 30px 20px; }
+            .brand-corner { font-size: 1.2rem; top: 15px; left: 15px; }
+
+            /* Header Mobile */
+            .header { height: auto; padding: 10px 15px; flex-wrap: wrap; gap: 5px; }
+            .header-title { width: 100%; text-align: center; order: 2; margin-top: 5px; }
+            .header-title h1 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .header-title p { display: none; } /* Ẩn dòng phụ trên mobile cho gọn */
+            .timer-wrap { width: 100%; text-align: center; order: 1; }
+            .timer-display { font-size: 1.5rem; }
+
+            /* Layout Mobile: Stack Column */
+            .main-container { flex-direction: column; }
+            
+            /* Content Area Mobile */
+            .content-area { 
+                flex: 1; padding: 15px; 
+                padding-bottom: 10px; /* Chừa chỗ cho sidebar dưới */
+            }
+            .question-card { padding: 20px; margin-bottom: 15px; }
+            .q-text { font-size: 1.1rem; margin-bottom: 15px; }
+            .option-item { padding: 12px; font-size: 1rem; }
+            
+            .toolbar { margin-top: 0; }
+            .btn-tool { flex: 1; justify-content: center; font-size: 0.9rem; padding: 10px; }
+
+            /* Sidebar Mobile (Bottom Panel) */
+            .sidebar {
+                width: 100%; max-width: none; border-left: none; border-top: 2px solid var(--primary);
+                height: 35vh; /* Chiếm 35% màn hình dưới */
+                padding: 10px 15px;
+                flex: none; /* Không co giãn */
+            }
+            .student-card { padding: 8px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+            .student-card div { margin-bottom: 0 !important; font-size: 0.9rem; }
+            
+            .q-grid { grid-template-columns: repeat(8, 1fr); gap: 5px; } /* Grid nhỏ hơn, nhiều cột hơn */
+            .grid-cell { font-size: 0.8rem; }
+            
+            .btn-submit { padding: 12px; margin-top: 5px; font-size: 1rem; }
+        }
     </style>
 </head>
 <body>
@@ -127,7 +191,6 @@
                 <p>KỲ THI GIÁO DỤC QUỐC PHÒNG – AN NINH 2</p>
             </div>
             <div class="timer-wrap">
-                <div style="font-size: 0.8rem; color: #a4b0be;">THỜI GIAN CÒN LẠI</div>
                 <div class="timer-display" id="timer">60:00</div>
             </div>
         </div>
@@ -138,24 +201,19 @@
                     <div class="options-grid" id="q-options"></div>
                 </div>
                 <div class="toolbar">
-                    <div>
-                        <button class="btn-tool btn-nav" onclick="navPrev()"><i class="fas fa-chevron-left"></i> Câu trước</button>
-                        <button class="btn-tool btn-nav" onclick="navNext()">Câu tiếp <i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div>
-                        <button class="btn-tool btn-func" id="btn-flag" onclick="toggleFlag()"><i class="fas fa-flag"></i> Cắm cờ</button>
-                    </div>
+                    <button class="btn-tool btn-nav" onclick="navPrev()"><i class="fas fa-arrow-left"></i> Trước</button>
+                    <button class="btn-tool btn-func" id="btn-flag" onclick="toggleFlag()"><i class="fas fa-flag"></i> Cắm cờ</button>
+                    <button class="btn-tool btn-nav" onclick="navNext()">Tiếp <i class="fas fa-arrow-right"></i></button>
                 </div>
             </div>
             <div class="sidebar">
                 <div class="student-card">
-                    <div style="font-size: 0.9rem; opacity: 0.8;">Thí sinh:</div>
-                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;" id="disp-name">...</div>
+                    <div style="font-weight: bold;" id="disp-name">...</div>
                     <div style="font-size: 0.9rem;">MSSV: <span id="disp-mssv">...</span></div>
                 </div>
-                <div style="margin-bottom: 10px; font-weight: bold; color: var(--bg-ocean); display:flex; justify-content:space-between;">
+                <div style="margin-bottom: 5px; font-weight: bold; color: var(--bg-ocean); display:flex; justify-content:space-between; font-size: 0.9rem;">
                     <span>Danh sách câu hỏi</span>
-                    <span style="font-size:0.8rem; color:#666;" id="q-progress">0/50</span>
+                    <span style="color:#666;" id="q-progress">0/50</span>
                 </div>
                 <div class="grid-wrapper">
                     <div class="q-grid" id="q-grid"></div>
@@ -166,21 +224,21 @@
 
     <div id="result-screen">
         <canvas id="fireworks"></canvas>
-        <div style="text-align: center; z-index: 2; background: rgba(0,0,0,0.6); padding: 50px; border-radius: 20px; border: 1px solid var(--primary);">
-            <h1 id="res-msg">CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH BÀI THI</h1>
-            <div class="score-circle">
+        <div style="text-align: center; z-index: 2; background: rgba(0,0,0,0.7); padding: 40px; border-radius: 20px; border: 1px solid var(--primary); width: 90%; max-width: 500px;">
+            <h2 id="res-msg" style="margin-bottom: 10px;">CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH BÀI THI</h2>
+            <div class="score-circle" style="margin: 20px auto;">
                 <div class="score-val" id="final-score">0.0</div>
                 <div style="font-size: 1rem;">ĐIỂM</div>
             </div>
             
-            <div id="mail-status" style="min-height: 40px;"></div>
+            <div id="mail-status" style="min-height: 40px; margin-bottom: 20px; font-style: italic; color: #7FDBFF;"></div>
             
-            <div style="margin-top: 20px;">
-                <button onclick="reviewExam()" style="padding: 12px 30px; border-radius: 50px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-right: 10px;">
-                    <i class="fas fa-history"></i> Xem lịch sử
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="reviewExam()" style="padding: 12px; border-radius: 50px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer;">
+                    <i class="fas fa-history"></i> XEM LẠI BÀI LÀM
                 </button>
-                <button onclick="location.reload()" style="padding: 12px 30px; border-radius: 50px; border: 1px solid white; background: transparent; color: white; font-weight: bold; cursor: pointer;">
-                    Về trang chủ
+                <button onclick="location.reload()" style="padding: 12px; border-radius: 50px; border: 1px solid white; background: transparent; color: white; font-weight: bold; cursor: pointer;">
+                    VỀ TRANG CHỦ
                 </button>
             </div>
         </div>
@@ -190,7 +248,7 @@
         <div class="popup">
             <h3 id="alert-title" style="color: var(--danger);">Thông báo</h3>
             <p id="alert-msg">Nội dung</p>
-            <button id="alert-btn" onclick="closeAlert()">Quay lại</button>
+            <button id="alert-btn" onclick="closeAlert()">Đóng</button>
         </div>
     </div>
     <div class="overlay" id="popup-confirm">
@@ -205,7 +263,7 @@
     </div>
 
     <script>
-        // ========= CẤU HÌNH KEY (BẠN ĐÃ CUNG CẤP) =========
+        // ========= CẤU HÌNH KEY CỦA BẠN =========
         const EMAILJS_PUBLIC_KEY = "doXY7ihRmO41tP-M7";
         const EMAILJS_SERVICE_ID = "service_zqm8peo";
         const EMAILJS_TEMPLATE_ID = "template_t4y3jxa";
@@ -214,12 +272,8 @@
         try {
             if(typeof emailjs !== 'undefined') {
                 emailjs.init(EMAILJS_PUBLIC_KEY);
-            } else {
-                console.warn("EmailJS chưa tải được. Kiểm tra kết nối mạng.");
             }
-        } catch(e) {
-            console.warn("Lỗi khởi tạo EmailJS:", e);
-        }
+        } catch(e) { console.warn("Lỗi EmailJS:", e); }
         // ============================================
 
         const sourceData = [
@@ -298,12 +352,7 @@
             let pass = document.getElementById('inp-pass').value.trim();
 
             if(!name || !id || !email || !pass) { showAlert("Bạn cần nhập đầy đủ thông tin!"); return; }
-            
-            // CHECK PASS
-            if(pass !== "DCT26") { 
-                showAlert("Sai mật khẩu! Vui lòng nhập đúng mật khẩu kỳ thi."); 
-                return; 
-            }
+            if(pass !== "DCT26") { showAlert("Sai mật khẩu! Vui lòng nhập đúng mật khẩu kỳ thi."); return; }
 
             studentName = name; studentID = id; studentEmail = email;
             startExam();
@@ -322,12 +371,10 @@
             document.getElementById('disp-name').innerText = studentName;
             document.getElementById('disp-mssv').innerText = studentID;
             
-            // TẠO NÚT NỘP BÀI KHI BẮT ĐẦU
+            // Thêm nút Nộp bài vào sidebar
             let sidebar = document.querySelector('.sidebar');
-            // Xóa nút cũ nếu có
             let oldBtn = document.querySelector('.btn-submit');
             if(oldBtn) oldBtn.remove();
-            
             let btnSubmit = document.createElement('button');
             btnSubmit.className = 'btn-submit';
             btnSubmit.innerText = "NỘP BÀI THI";
@@ -425,12 +472,11 @@
 
             startFireworks(score);
             
-            // GỬI MAIL TỰ ĐỘNG
+            // GỬI MAIL
             const statusBox = document.getElementById('mail-status');
             statusBox.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-sync fa-spin"></i> Đang tự động gửi kết quả...</span>';
 
             if(typeof emailjs !== 'undefined') {
-                // TẠO NỘI DUNG CHI TIẾT
                 let messageContent = `CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH BÀI THI\n\n` +
                                      `Họ và tên thí sinh: ${studentName}\n` +
                                      `Mã số sinh viên: ${studentID}\n` +
@@ -441,7 +487,7 @@
 
                 let params = {
                     to_email: studentEmail,
-                    cc_email: "huakhaitrieustvol@gmail.com",
+                    cc_email: "huakhaitrieustvol@gmail.com", 
                     name: studentName,
                     mssv: studentID,
                     score: score,
@@ -454,7 +500,6 @@
                     }, function(error) {
                         console.log('FAILED...', error);
                         statusBox.innerHTML = `<span style="color:var(--danger)"><i class="fas fa-exclamation-triangle"></i> Lỗi gửi mail: ${JSON.stringify(error)}</span>`;
-                        alert("Không thể gửi mail. Vui lòng kiểm tra Template EmailJS hoặc Key.\nLỗi chi tiết: " + JSON.stringify(error));
                     });
             } else {
                 statusBox.innerHTML = '<span style="color:var(--danger)">Không có kết nối mạng để gửi mail.</span>';
@@ -466,14 +511,12 @@
             document.getElementById('result-screen').style.display = 'none';
             document.getElementById('exam-screen').style.display = 'flex';
             
-            // Xóa nút Nộp bài
             let oldBtn = document.querySelector('.btn-submit');
             if(oldBtn) oldBtn.remove();
 
-            // Thêm nút Quay lại
             let sidebar = document.querySelector('.sidebar');
             let btnBack = document.createElement('button');
-            btnBack.className = 'btn-submit'; // Tái sử dụng class
+            btnBack.className = 'btn-submit'; 
             btnBack.style.background = '#7f8c8d';
             btnBack.innerText = "QUAY LẠI BẢNG ĐIỂM";
             btnBack.onclick = backToResult;
