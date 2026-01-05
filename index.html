@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HỆ THỐNG THI TRẮC NGHIỆM - TRIEU TREM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <style>
+        :root {
+            --bg-deep: #021019;
+            --bg-ocean: #05263b;
+            --primary: #00a8cc;
+            --accent: #ffa502;
+            --glass: rgba(5, 38, 59, 0.95);
+            --glass-border: rgba(0, 168, 204, 0.3);
+            --text-main: #e6f7ff;
+            --danger: #ff4757;
+            --success: #2ed573;
+        }
+
+        * { box-sizing: border-box; user-select: none; }
+        body { margin: 0; font-family: 'Roboto', sans-serif; background-color: var(--bg-deep); background-image: radial-gradient(circle at 50% 50%, #0a3d62 0%, #021019 100%); color: var(--text-main); height: 100vh; overflow: hidden; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+        .ocean-bg { position: absolute; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
+        .bubble { position: absolute; bottom: -50px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.1); border-radius: 50%; animation: rise linear infinite; }
+        @keyframes rise { 0% { transform: translateY(0) translateX(0); opacity: 0; } 50% { opacity: 0.6; } 100% { transform: translateY(-120vh) translateX(50px); opacity: 0; } }
+
+        #login-screen { display: flex; justify-content: center; align-items: center; height: 100vh; position: relative; z-index: 2; }
+        .brand-corner { position: absolute; top: 20px; left: 20px; font-family: 'Merriweather', serif; font-weight: 700; color: var(--primary); font-size: 1.5rem; text-shadow: 0 0 15px var(--primary); letter-spacing: 2px; }
+        .login-card { background: var(--glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); padding: 40px; border-radius: 20px; width: 450px; text-align: center; box-shadow: 0 0 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 168, 204, 0.1); animation: fadeIn 1s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .login-card h2 { margin-bottom: 25px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { display: block; margin-bottom: 5px; color: #a4b0be; font-size: 0.9rem; }
+        .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 1px solid #2f3542; border-radius: 8px; color: white; font-size: 1rem; transition: 0.3s; }
+        .input-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 10px rgba(0, 168, 204, 0.3); }
+        .btn-login { width: 100%; padding: 14px; background: linear-gradient(135deg, var(--bg-ocean), var(--primary)); border: 1px solid var(--primary); color: white; font-weight: bold; font-size: 1.1rem; border-radius: 50px; cursor: pointer; transition: 0.3s; margin-top: 15px; text-transform: uppercase; }
+        .btn-login:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 168, 204, 0.4); }
+
+        #exam-screen { display: none; height: 100vh; flex-direction: column; background: #f1f2f6; color: #2f3542; position: relative; z-index: 10; }
+        .header { background: linear-gradient(to right, var(--bg-deep), var(--bg-ocean)); padding: 0 30px; height: 70px; display: flex; justify-content: space-between; align-items: center; color: white; border-bottom: 4px solid var(--primary); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .header-title h1 { font-size: 1.2rem; margin: 0; color: var(--primary); }
+        .header-title p { font-size: 0.85rem; margin: 3px 0 0; opacity: 0.8; }
+        .timer-wrap { text-align: right; }
+        .timer-display { font-family: 'Courier New', monospace; font-size: 1.8rem; font-weight: bold; color: var(--accent); text-shadow: 0 0 10px rgba(255, 165, 2, 0.5); }
+        
+        .main-container { display: flex; flex: 1; overflow: hidden; }
+        .content-area { flex: 3; padding: 40px; overflow-y: auto; background: #dfe4ea; }
+        .question-card { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); min-height: 60%; }
+        .q-text { font-family: 'Merriweather', serif; font-size: 1.2rem; line-height: 1.6; color: var(--bg-deep); margin-bottom: 30px; border-left: 5px solid var(--primary); padding-left: 20px; }
+        .options-grid { display: flex; flex-direction: column; gap: 15px; }
+        .option-item { padding: 15px 20px; border: 2px solid #ced6e0; border-radius: 10px; cursor: pointer; transition: 0.2s; background: white; display: flex; align-items: center; font-size: 1.05rem; }
+        .option-item:hover { border-color: var(--primary); background: #f1fcff; }
+        .option-item.selected { background: var(--bg-ocean); color: white; border-color: var(--bg-ocean); }
+        .badge { width: 30px; height: 30px; background: #dfe4ea; color: #2f3542; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
+        .option-item.selected .badge { background: var(--primary); color: white; }
+
+        .toolbar { margin-top: 30px; display: flex; justify-content: space-between; }
+        .btn-tool { padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .btn-nav { background: white; border: 1px solid #ced6e0; color: var(--bg-deep); }
+        .btn-nav:hover { background: var(--primary); color: white; border-color: var(--primary); }
+        .btn-func { background: #f1f2f6; color: #57606f; }
+        .btn-func.active { background: var(--accent); color: white; box-shadow: 0 0 10px var(--accent); }
+        
+        .sidebar { flex: 1; background: white; border-left: 1px solid #ced6e0; display: flex; flex-direction: column; padding: 20px; max-width: 350px; }
+        .student-card { background: linear-gradient(135deg, var(--bg-ocean), var(--bg-deep)); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .grid-wrapper { flex: 1; overflow-y: auto; margin-bottom: 20px; }
+        .q-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .grid-cell { aspect-ratio: 1; border: 1px solid #ced6e0; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; font-size: 0.9rem; position: relative; background: #f1f2f6; transition: 0.2s; }
+        .grid-cell:hover { background: #dfe4ea; }
+        .grid-cell.current { border: 2px solid var(--primary); font-weight: bold; }
+        .grid-cell.answered { background: var(--success); color: white; border-color: var(--success); }
+        .grid-cell.flagged::after { content: '\f024'; font-family: 'Font Awesome 5 Free'; font-weight: 900; position: absolute; top: -5px; right: -5px; color: var(--danger); font-size: 0.8rem; }
+        .btn-submit { width: 100%; padding: 15px; background: var(--danger); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; margin-top:10px; }
+        .btn-submit:hover { background: #ff6b81; }
+
+        #result-screen { display: none; height: 100vh; flex-direction: column; justify-content: center; align-items: center; position: relative; z-index: 20; background: var(--bg-deep); color: white; }
+        .score-circle { width: 200px; height: 200px; border-radius: 50%; border: 5px solid var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(0, 168, 204, 0.1); margin: 30px 0; box-shadow: 0 0 30px var(--primary); }
+        .score-val { font-size: 3.5rem; font-weight: bold; color: var(--accent); }
+        
+        #mail-status { margin-bottom: 20px; font-style: italic; color: var(--primary); font-size: 1.1em; }
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; display: none; justify-content: center; align-items: center; }
+        .popup { background: white; color: #333; padding: 30px; border-radius: 15px; width: 350px; text-align: center; box-shadow: 0 0 30px rgba(255,255,255,0.2); }
+        .popup button { margin-top: 20px; padding: 10px 25px; border: none; border-radius: 5px; background: var(--bg-deep); color: white; cursor: pointer; }
+        canvas { position: absolute; top: 0; left: 0; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div class="ocean-bg" id="bubble-container"></div>
+
+    <div id="login-screen">
+        <div class="brand-corner">TRIEU TREM</div>
+        <div class="login-card">
+            <h2><i class="fas fa-user-graduate"></i> Đăng Nhập</h2>
+            <div class="input-group">
+                <label>Họ và tên thí sinh</label>
+                <input type="text" id="inp-name" placeholder="Nhập họ và tên...">
+            </div>
+            <div class="input-group">
+                <label>Mã số Sinh viên</label>
+                <input type="text" id="inp-mssv" placeholder="Nhập MSSV...">
+            </div>
+            <div class="input-group">
+                <label>Email cá nhân (để nhận điểm)</label>
+                <input type="email" id="inp-email" placeholder="Nhập Email của bạn...">
+            </div>
+            <div class="input-group">
+                <label>Mật khẩu</label>
+                <input type="password" id="inp-pass" placeholder="Mật khẩu vào thi...">
+            </div>
+            <button class="btn-login" onclick="attemptLogin()">Đăng Nhập <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <div id="exam-screen">
+        <div class="header">
+            <div class="header-title">
+                <h1>HỆ THỐNG THI TRẮC NGHIỆM - TRIEU TREM</h1>
+                <p>KỲ THI GIÁO DỤC QUỐC PHÒNG – AN NINH 2</p>
+            </div>
+            <div class="timer-wrap">
+                <div style="font-size: 0.8rem; color: #a4b0be;">THỜI GIAN CÒN LẠI</div>
+                <div class="timer-display" id="timer">60:00</div>
+            </div>
+        </div>
+        <div class="main-container">
+            <div class="content-area" id="exam-content">
+                <div class="question-card">
+                    <div class="q-text" id="q-content">Đang tải câu hỏi...</div>
+                    <div class="options-grid" id="q-options"></div>
+                </div>
+                <div class="toolbar">
+                    <div>
+                        <button class="btn-tool btn-nav" onclick="navPrev()"><i class="fas fa-chevron-left"></i> Câu trước</button>
+                        <button class="btn-tool btn-nav" onclick="navNext()">Câu tiếp <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                    <div>
+                        <button class="btn-tool btn-func" id="btn-flag" onclick="toggleFlag()"><i class="fas fa-flag"></i> Cắm cờ</button>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar">
+                <div class="student-card">
+                    <div style="font-size: 0.9rem; opacity: 0.8;">Thí sinh:</div>
+                    <div style="font-weight: bold; font-size: 1.1rem; margin-bottom: 5px;" id="disp-name">...</div>
+                    <div style="font-size: 0.9rem;">MSSV: <span id="disp-mssv">...</span></div>
+                </div>
+                <div style="margin-bottom: 10px; font-weight: bold; color: var(--bg-ocean); display:flex; justify-content:space-between;">
+                    <span>Danh sách câu hỏi</span>
+                    <span style="font-size:0.8rem; color:#666;" id="q-progress">0/50</span>
+                </div>
+                <div class="grid-wrapper">
+                    <div class="q-grid" id="q-grid"></div>
+                </div>
+                </div>
+        </div>
+    </div>
+
+    <div id="result-screen">
+        <canvas id="fireworks"></canvas>
+        <div style="text-align: center; z-index: 2; background: rgba(0,0,0,0.6); padding: 50px; border-radius: 20px; border: 1px solid var(--primary);">
+            <h1 id="res-msg">CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH BÀI THI</h1>
+            <div class="score-circle">
+                <div class="score-val" id="final-score">0.0</div>
+                <div style="font-size: 1rem;">ĐIỂM</div>
+            </div>
+            
+            <div id="mail-status" style="min-height: 40px;"></div>
+            
+            <div style="margin-top: 20px;">
+                <button onclick="reviewExam()" style="padding: 12px 30px; border-radius: 50px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; margin-right: 10px;">
+                    <i class="fas fa-history"></i> Xem lịch sử
+                </button>
+                <button onclick="location.reload()" style="padding: 12px 30px; border-radius: 50px; border: 1px solid white; background: transparent; color: white; font-weight: bold; cursor: pointer;">
+                    Về trang chủ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="popup-alert">
+        <div class="popup">
+            <h3 id="alert-title" style="color: var(--danger);">Thông báo</h3>
+            <p id="alert-msg">Nội dung</p>
+            <button id="alert-btn" onclick="closeAlert()">Quay lại</button>
+        </div>
+    </div>
+    <div class="overlay" id="popup-confirm">
+        <div class="popup">
+            <h3 style="color: var(--bg-ocean);">Xác nhận</h3>
+            <p>Bạn có chắc chắn muốn nộp bài không?</p>
+            <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+                <button onclick="closeConfirm()" style="background: #ccc; color: #333;">Hủy</button>
+                <button onclick="finishExam()" style="background: var(--bg-ocean); color: white;">Chắc chắn</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========= CẤU HÌNH KEY (BẠN ĐÃ CUNG CẤP) =========
+        const EMAILJS_PUBLIC_KEY = "doXY7ihRmO41tP-M7";
+        const EMAILJS_SERVICE_ID = "service_zqm8peo";
+        const EMAILJS_TEMPLATE_ID = "template_t4y3jxa";
+
+        // Khởi tạo EmailJS
+        try {
+            if(typeof emailjs !== 'undefined') {
+                emailjs.init(EMAILJS_PUBLIC_KEY);
+            } else {
+                console.warn("EmailJS chưa tải được. Kiểm tra kết nối mạng.");
+            }
+        } catch(e) {
+            console.warn("Lỗi khởi tạo EmailJS:", e);
+        }
+        // ============================================
+
+        const sourceData = [
+            { q: '"Diễn biến hoà bình" là gì?', a: ["Là chiến lược cơ bản nhằm lật đổ chế độ chính quyền của các nước từ bên trong bằng biện pháp phi vũ trang", "Là chiến lược tấn công quân sự tổng lực", "Là chiến lược ngoại giao thân thiện", "Là hoạt động kinh tế đơn thuần"] },
+            { q: 'Nội dung chính của chiến lược "Diễn biến hoà bình" là kẻ thù sử dụng thủ đoạn phá hoại nào?', a: ["Kinh tế, tư tưởng, văn hoá, xã hội, đối ngoại, an ninh", "Chính trị, quân sự, ngoại giao", "Chỉ tập trung vào kinh tế", "Chỉ tập trung vào quân sự"] },
+            { q: 'Bạo loạn lật đổ gồm có những hình thức nào?', a: ["Bạo loạn chính trị kết hợp với đấu tranh vũ trang và gây rối", "Chỉ có bạo loạn vũ trang", "Chỉ có biểu tình ôn hòa", "Gây rối trật tự công cộng đơn thuần"] },
+            { q: 'Quan hệ giữa “Diễn biến hoà bình” và bạo loạn lật đổ như thế nào?', a: ["Diễn biến hoà bình là quá trình tạo nên những điều kiện, thời cơ cho bạo loạn lật đổ", "Không có quan hệ gì", "Bạo loạn lật đổ có trước", "Hai quá trình diễn ra độc lập"] },
+            { q: 'Mục tiêu của các thế lực thù địch thực hiện “Diễn biến hoà bình” chống phá cách mạng Việt Nam', a: ["Xóa bỏ chế độ XHCN, chuyển hoá nước ta theo con đường tư bản chủ nghĩa", "Giúp Việt Nam phát triển kinh tế", "Hợp tác văn hóa", "Tăng cường quốc phòng cho Việt Nam"] },
+            { q: 'Mục đích thủ đoạn chống phá về kinh tế của các thế lực thù địch đối với nước ta là gì?', a: ["Chuyển hoá nền kinh tế Việt Nam theo quỹ đạo kinh tế thị trường tư bản chủ nghĩa", "Giúp kinh tế nhà nước phát triển", "Hỗ trợ vốn ODA không điều kiện", "Xóa đói giảm nghèo"] },
+            { q: 'Kẻ thù thực hiện thủ đoạn diễn biến hoà bình phá hoại kinh tế của ta nhằm mục đích gì?', a: ["Đặt ra các điều kiện để buộc ta phải theo quĩ đạo của chúng", "Giúp ta hội nhập quốc tế", "Tăng trưởng GDP", "Giảm lạm phát"] },
+            { q: 'Một trong những nội dung kẻ thù thực hiện chống phá ta về chính trị:', a: ["Kích động đòi thực hiện chế độ “đa nguyên chính trị, đa Đảng đối lập”", "Củng cố khối đại đoàn kết", "Ủng hộ Đảng Cộng sản", "Xây dựng nhà nước pháp quyền"] },
+            { q: 'Thực hiện thủ đoạn “Diễn biến hoà bình” về văn hoá, kẻ thù tập trung tấn công vào đâu?', a: ["Vào bản sắc văn hoá và giá trị văn hoá của dân tộc Việt Nam", "Vào nền kinh tế", "Vào hệ thống giao thông", "Vào y tế giáo dục"] },
+            { q: 'Các thế lực thù địch "Lợi dụng vấn đề tôn giáo – dân tộc" để chống phá ta như thế nào?', a: ["Lợi dụng chính sách tự do tôn giáo của Đảng, Nhà nước ta để truyền đạo trái phép", "Ủng hộ tự do tín ngưỡng", "Xây dựng chùa chiền", "Tổ chức lễ hội văn hóa"] },
+            { q: 'Đối với lực lượng Quân đội và Công an, các thế lực thù địch chủ trương vô hiệu hoá sự lãnh đạo của Đảng với luận điểm nào?', a: ["Đòi “phi chính trị hóa” đối với lực lượng vũ trang", "Tăng cường sự lãnh đạo của Đảng", "Hiện đại hóa quân đội", "Xây dựng công an nhân dân"] },
+            { q: 'Nguyên tắc xử lí khi có bạo loạn diễn ra là:', a: ["Nhanh gọn, kiên quyết, linh hoạt, đúng đối tượng, không để lan rộng, kéo dài", "Kéo dài thời gian để đàm phán", "Sử dụng vũ lực ngay lập tức", "Bỏ mặc cho tự giải tán"] },
+            { q: 'Dân tộc là gì?', a: ["Là một cộng đồng người ổn định, hình thành trong lịch sử tạo lập một quốc gia...", "Là tập hợp ngẫu nhiên của mọi người", "Là một tổ chức tôn giáo", "Là một giai cấp xã hội"] },
+            { q: 'Việt Nam có bao nhiêu dân tộc anh em?', a: ["54", "52", "60", "63"] },
+            { q: 'Đặc điểm nổi bật trong quan hệ giữa các dân tộc ở Việt Nam?', a: ["Các dân tộc có truyền thống đoàn kết gắn bó xây dựng quốc gia thống nhất", "Thường xuyên xung đột", "Sống tách biệt hoàn toàn", "Phân chia đẳng cấp rõ rệt"] },
+            { q: 'Tôn giáo là gì?', a: ["Là một hình thái ý thức xã hội, phản ánh hiện thực khách quan theo quan niệm hoang đường...", "Là khoa học thực nghiệm", "Là mê tín dị đoan thuần túy", "Là triết học duy vật"] },
+            { q: 'Mê tín dị đoan là gì?', a: ["Là tin vào những điều mơ hồ, nhảm nhí, không phù hợp với lẽ phải", "Là tín ngưỡng truyền thống", "Là tôn giáo chính thống", "Là văn hóa dân gian"] },
+            { q: 'Nguồn gốc của tôn giáo bao gồm các yếu tố nào?', a: ["Yếu tố kinh tế - xã hội; yếu tố nhận thức; yếu tố tâm lý", "Chỉ do kinh tế", "Chỉ do tâm lý sợ hãi", "Do thần linh ban tặng"] },
+            { q: 'Quan điểm của Đảng ta về tôn giáo?', a: ["Tôn giáo còn tồn tại lâu dài, là nhu cầu tinh thần của một bộ phận nhân dân", "Cần xóa bỏ ngay lập tức", "Là thuốc phiện của nhân dân", "Không quan tâm đến tôn giáo"] },
+            { q: 'Tôn giáo nào sau đây ra đời ở Việt Nam?', a: ["Đạo Cao Đài, Đạo Hòa Hảo", "Đạo Phật", "Đạo Thiên Chúa", "Đạo Tin Lành"] },
+            { q: 'Bảo vệ môi trường là gì?', a: ["Là hoạt động giữ gìn, phòng ngừa, hạn chế tác động xấu đến môi trường...", "Là khai thác tối đa tài nguyên", "Là cấm mọi hoạt động sản xuất", "Là việc của riêng nhà nước"] },
+            { q: 'Tội phạm môi trường là gì?', a: ["Hành vi nguy hiểm cho xã hội quy định trong Bộ luật HS xâm phạm môi trường", "Hành vi xả rác nhỏ lẻ", "Hành vi trồng cây", "Hành vi nuôi cá"] },
+            { q: 'Nguyên nhân chủ quan của vi phạm pháp luật môi trường?', a: ["Do ý thức coi thường pháp luật và lợi nhuận kinh tế", "Do thiên tai", "Do biến đổi khí hậu", "Do dân số đông"] },
+            { q: 'Người điều khiển xe máy được chở 2 người trong trường hợp nào?', a: ["Chở người bệnh đi cấp cứu, áp giải tội phạm, trẻ em dưới 14 tuổi", "Đi đường vắng", "Khi xe còn mới", "Khi trời mưa"] },
+            { q: 'Độ tuổi được lái xe máy dưới 50cc?', a: ["Đủ 16 tuổi", "Đủ 14 tuổi", "Đủ 18 tuổi", "Không quy định"] },
+            { q: 'Nghị định 100/2019/NĐ-CP có hiệu lực từ ngày nào?', a: ["01/01/2020", "01/01/2019", "30/12/2019", "02/09/2020"] },
+            { q: 'Nguyên tắc nhường đường tại vòng xuyến?', a: ["Nhường đường cho xe đi từ bên trái", "Nhường đường cho xe đi từ bên phải", "Xe nào to hơn được đi trước", "Ai đến trước đi trước"] },
+            { q: 'Nồng độ cồn cho phép đối với người lái xe ô tô là bao nhiêu?', a: ["Tuyệt đối không được có (0 mg/l)", "Dưới 0.25 mg/l", "Dưới 50 mg/100ml máu", "Tùy tửu lượng"] },
+            { q: 'Hành vi xâm phạm danh dự, nhân phẩm là gì?', a: ["Làm cho người khác bị xúc phạm, tổn thương tinh thần, xấu hổ...", "Đánh đập gây thương tích", "Lấy trộm tài sản", "Gây tai nạn giao thông"] },
+            { q: 'Các tội xâm phạm tình dục bao gồm:', a: ["Hiếp dâm, cưỡng dâm, dâm ô...", "Chửi bới, lăng mạ", "Bắt cóc", "Cướp tài sản"] },
+            { q: 'Luật An ninh mạng có hiệu lực từ ngày nào?', a: ["01/01/2019", "01/07/2018", "01/01/2020", "02/09/2019"] },
+            { q: 'Hành vi nào bị nghiêm cấm trên không gian mạng?', a: ["Thông tin sai sự thật, xúc phạm danh dự, kích động bạo lực...", "Bán hàng online", "Học tập trực tuyến", "Kết bạn bốn phương"] },
+            { q: 'Mục tiêu lớn nhất của tin tặc (hacker) thường là gì?', a: ["Tài chính hoặc chính trị", "Để nổi tiếng", "Thử nghiệm phần mềm", "Giúp đỡ người khác"] },
+            { q: 'An ninh mạng là gì?', a: ["Sự bảo đảm hoạt động trên không gian mạng không gây phương hại đến an ninh quốc gia...", "Là phần mềm diệt virus", "Là khóa máy tính", "Là cấm internet"] },
+            { q: 'Đặc điểm của an ninh phi truyền thống?', a: ["Mang tính xuyên quốc gia, lan truyền nhanh", "Chỉ xảy ra trong một nước", "Chỉ liên quan đến quân sự", "Không nguy hiểm"] },
+            { q: 'Ví dụ về an ninh phi truyền thống?', a: ["Biến đổi khí hậu, dịch bệnh, tội phạm mạng", "Chiến tranh biên giới", "Xâm lược lãnh thổ", "Đảo chính quân sự"] },
+            { q: 'An ninh truyền thống là gì?', a: ["Bảo vệ chủ quyền lãnh thổ, chống xâm lược vũ trang", "Chống dịch bệnh", "Chống tin tặc", "Bảo vệ môi trường"] },
+            { q: 'Tội hủy hoại rừng quy định tại điều mấy BLHS 2015?', a: ["Điều 243", "Điều 200", "Điều 100", "Điều 300"] },
+            { q: 'Sinh viên có trách nhiệm gì trong bảo vệ môi trường?', a: ["Nắm vững quy định, xây dựng ý thức tiết kiệm tài nguyên...", "Chỉ cần học giỏi", "Không cần quan tâm", "Phó mặc cho nhà trường"] },
+            { q: 'Phòng chống vi phạm pháp luật giao thông là trách nhiệm của ai?', a: ["Của toàn xã hội", "Chỉ của cảnh sát giao thông", "Chỉ của nhà trường", "Chỉ của sinh viên"] },
+            { q: 'Tốc độ tối đa trong khu vực đông dân cư (đường đôi) đối với xe máy là?', a: ["60 km/h", "50 km/h", "40 km/h", "70 km/h"] },
+            { q: 'Khi đèn tín hiệu giao thông chuyển sang màu vàng, người điều khiển phải làm gì?', a: ["Dừng lại trước vạch dừng", "Tăng tốc để vượt qua", "Bấm còi inh ỏi", "Rẽ phải ngay lập tức"] },
+            { q: 'Hành vi buôn bán phụ nữ, trẻ em thuộc nhóm tội phạm nào?', a: ["Tội phạm xâm phạm danh dự, nhân phẩm (mua bán người)", "Tội phạm kinh tế", "Tội phạm môi trường", "Tội phạm ma túy"] },
+            { q: 'Phòng ngừa tội phạm có mấy mức độ?', a: ["Phòng ngừa chung và phòng ngừa riêng", "Chỉ phòng ngừa chung", "3 mức độ", "4 mức độ"] },
+            { q: 'Luật An toàn thông tin mạng có hiệu lực khi nào?', a: ["01/07/2016", "01/01/2015", "01/01/2017", "20/11/2018"] },
+            { q: 'Mã độc tống tiền (Ransomware) là gì?', a: ["Phần mềm mã hóa dữ liệu đòi tiền chuộc", "Virus làm chậm máy", "Phần mềm quảng cáo", "Công cụ bẻ khóa"] },
+            { q: 'Biện pháp kỹ thuật cơ bản để bảo vệ mật khẩu?', a: ["Đặt mật khẩu mạnh, thay đổi định kỳ, không dùng chung", "Đặt mật khẩu là 123456", "Viết mật khẩu lên màn hình", "Dùng ngày sinh làm mật khẩu"] },
+            { q: 'Lực lượng nòng cốt bảo vệ an ninh mạng là ai?', a: ["Lực lượng chuyên trách bảo vệ an ninh mạng (A05...)", "Nhân viên văn phòng", "Học sinh sinh viên", "Nhà mạng viễn thông"] },
+            { q: 'Thách thức an ninh phi truyền thống đối với Việt Nam?', a: ["Nguy cơ tụt hậu kinh tế, biến đổi khí hậu, dịch bệnh", "Chỉ có nguy cơ chiến tranh", "Không có thách thức nào", "Dư thừa tài nguyên"] },
+            { q: 'Quan hệ giữa an ninh truyền thống và phi truyền thống?', a: ["Có mối quan hệ chặt chẽ, chuyển hóa lẫn nhau", "Không liên quan", "Đối lập nhau hoàn toàn", "Triệt tiêu lẫn nhau"] }
+        ];
+
+        let studentName = ""; let studentID = ""; let studentEmail = "";
+        let examData = []; let userAnswers = {}; let flagged = new Set();
+        let currentQIndex = 0; let timerInterval; let timeLeft = 60 * 60; let isReviewing = false;
+
+        function createBubbles() {
+            const container = document.getElementById('bubble-container');
+            for(let i=0; i<15; i++){
+                let b = document.createElement('div');
+                b.className = 'bubble';
+                let size = Math.random() * 60 + 20; b.style.width = size + 'px'; b.style.height = size + 'px';
+                b.style.left = Math.random() * 100 + '%'; b.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                b.style.animationDelay = (Math.random() * 5) + 's'; container.appendChild(b);
+            }
+        }
+        createBubbles();
+
+        function attemptLogin() {
+            let name = document.getElementById('inp-name').value.trim();
+            let id = document.getElementById('inp-mssv').value.trim();
+            let email = document.getElementById('inp-email').value.trim();
+            let pass = document.getElementById('inp-pass').value.trim();
+
+            if(!name || !id || !email || !pass) { showAlert("Bạn cần nhập đầy đủ thông tin!"); return; }
+            
+            // CHECK PASS
+            if(pass !== "DCT26") { 
+                showAlert("Sai mật khẩu! Vui lòng nhập đúng mật khẩu kỳ thi."); 
+                return; 
+            }
+
+            studentName = name; studentID = id; studentEmail = email;
+            startExam();
+        }
+
+        function startExam() {
+            let rawShuffled = [...sourceData].sort(() => 0.5 - Math.random()).slice(0, 50);
+            examData = rawShuffled.map(item => {
+                let opts = item.a.map((txt, idx) => ({ txt: txt, isCorrect: idx === 0 }));
+                opts.sort(() => 0.5 - Math.random());
+                return { q: item.q, options: opts };
+            });
+
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('exam-screen').style.display = 'flex';
+            document.getElementById('disp-name').innerText = studentName;
+            document.getElementById('disp-mssv').innerText = studentID;
+            
+            // TẠO NÚT NỘP BÀI KHI BẮT ĐẦU
+            let sidebar = document.querySelector('.sidebar');
+            // Xóa nút cũ nếu có
+            let oldBtn = document.querySelector('.btn-submit');
+            if(oldBtn) oldBtn.remove();
+            
+            let btnSubmit = document.createElement('button');
+            btnSubmit.className = 'btn-submit';
+            btnSubmit.innerText = "NỘP BÀI THI";
+            btnSubmit.onclick = confirmSubmit;
+            sidebar.appendChild(btnSubmit);
+
+            document.documentElement.requestFullscreen().catch(()=>{});
+            enableSecurity();
+            renderGrid(); loadQuestion(0);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                let m = Math.floor(timeLeft / 60); let s = timeLeft % 60;
+                document.getElementById('timer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+                if(timeLeft <= 0) finishExam(true);
+            }, 1000);
+        }
+
+        function loadQuestion(idx) {
+            currentQIndex = idx; let qData = examData[idx];
+            document.getElementById('q-content').innerText = `Câu ${idx+1}: ${qData.q}`;
+            let container = document.getElementById('q-options'); container.innerHTML = '';
+            
+            qData.options.forEach((opt, optIdx) => {
+                let div = document.createElement('div'); div.className = 'option-item';
+                if(userAnswers[idx] === optIdx) div.classList.add('selected');
+                if(isReviewing) {
+                    div.style.pointerEvents = 'none';
+                    if(opt.isCorrect) { div.style.border = "2px solid #2ed573"; div.style.background = "rgba(46, 213, 115, 0.1)"; div.innerHTML += ' <i class="fas fa-check" style="color:#2ed573; margin-left:auto;"></i>'; }
+                    if(userAnswers[idx] === optIdx && !opt.isCorrect) { div.style.border = "2px solid #ff4757"; div.style.background = "rgba(255, 71, 87, 0.1)"; div.innerHTML += ' <i class="fas fa-times" style="color:#ff4757; margin-left:auto;"></i>'; }
+                } else { div.onclick = () => selectAnswer(idx, optIdx); }
+                div.innerHTML = `<div class="badge">${String.fromCharCode(65+optIdx)}</div> ${div.innerHTML || opt.txt}`;
+                container.appendChild(div);
+            });
+            document.querySelectorAll('.grid-cell').forEach(c => c.classList.remove('current'));
+            document.getElementById(`cell-${idx}`).classList.add('current');
+            let btnF = document.getElementById('btn-flag');
+            if(flagged.has(idx)) { btnF.classList.add('active'); btnF.innerHTML = '<i class="fas fa-flag"></i> Bỏ cờ'; } 
+            else { btnF.classList.remove('active'); btnF.innerHTML = '<i class="fas fa-flag"></i> Cắm cờ'; }
+        }
+
+        function selectAnswer(qIdx, oIdx) {
+            userAnswers[qIdx] = oIdx;
+            let opts = document.querySelectorAll('.option-item'); opts.forEach(o => o.classList.remove('selected')); opts[oIdx].classList.add('selected');
+            let cell = document.getElementById(`cell-${qIdx}`); cell.classList.add('answered'); cell.innerText = ""; cell.innerHTML = `<b>${String.fromCharCode(65+oIdx)}</b>`;
+            updateProgress();
+        }
+
+        function renderGrid() {
+            let grid = document.getElementById('q-grid'); grid.innerHTML = '';
+            examData.forEach((_, i) => {
+                let d = document.createElement('div'); d.className = 'grid-cell'; d.id = `cell-${i}`; d.innerText = i + 1; d.onclick = () => loadQuestion(i); grid.appendChild(d);
+            });
+        }
+        function updateProgress() { document.getElementById('q-progress').innerText = `${Object.keys(userAnswers).length}/50`; }
+        function navNext() { if(currentQIndex < 49) loadQuestion(currentQIndex+1); }
+        function navPrev() { if(currentQIndex > 0) loadQuestion(currentQIndex-1); }
+        function toggleFlag() {
+            let cell = document.getElementById(`cell-${currentQIndex}`);
+            if(flagged.has(currentQIndex)) { flagged.delete(currentQIndex); cell.classList.remove('flagged'); } 
+            else { flagged.add(currentQIndex); cell.classList.add('flagged'); }
+            loadQuestion(currentQIndex);
+        }
+
+        function enableSecurity() {
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('fullscreenchange', () => {
+                if(!document.fullscreenElement && !isReviewing) {
+                    let msg = new SpeechSynthesisUtterance("Bạn đang thoát khỏi chế độ màn hình, cần quay lại kì thi");
+                    msg.lang = 'vi-VN'; window.speechSynthesis.speak(msg);
+                    showAlert("Bạn đang thoát khỏi chế độ màn hình, cần quay lại kì thi");
+                    document.getElementById('alert-btn').onclick = function() { document.documentElement.requestFullscreen(); closeAlert(); }
+                }
+            });
+        }
+
+        function confirmSubmit() { document.getElementById('popup-confirm').style.display = 'flex'; }
+        function closeConfirm() { document.getElementById('popup-confirm').style.display = 'none'; }
+        function showAlert(msg) { document.getElementById('alert-msg').innerText = msg; document.getElementById('popup-alert').style.display = 'flex'; }
+        function closeAlert() { document.getElementById('popup-alert').style.display = 'none'; }
+
+        function finishExam(auto=false) {
+            clearInterval(timerInterval); closeConfirm();
+            if(document.fullscreenElement) document.exitFullscreen();
+
+            let correctCount = 0;
+            examData.forEach((q, idx) => {
+                if(userAnswers[idx] !== undefined) { if(q.options[userAnswers[idx]].isCorrect) correctCount++; }
+            });
+            let score = (correctCount * 0.2).toFixed(2);
+            
+            document.getElementById('exam-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+            document.getElementById('final-score').innerText = score;
+
+            startFireworks(score);
+            
+            // GỬI MAIL TỰ ĐỘNG
+            const statusBox = document.getElementById('mail-status');
+            statusBox.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-sync fa-spin"></i> Đang tự động gửi kết quả...</span>';
+
+            if(typeof emailjs !== 'undefined') {
+                // TẠO NỘI DUNG CHI TIẾT
+                let messageContent = `CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH BÀI THI\n\n` +
+                                     `Họ và tên thí sinh: ${studentName}\n` +
+                                     `Mã số sinh viên: ${studentID}\n` +
+                                     `---------------------------------\n` +
+                                     `SỐ ĐIỂM CỦA BẠN LÀ: ${score} ĐIỂM\n` +
+                                     `---------------------------------\n` +
+                                     `Thời gian nộp bài: ${new Date().toLocaleString('vi-VN')}`;
+
+                let params = {
+                    to_email: studentEmail,
+                    cc_email: "huakhaitrieustvol@gmail.com",
+                    name: studentName,
+                    mssv: studentID,
+                    score: score,
+                    message: messageContent
+                };
+
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+                    .then(function(response) {
+                        statusBox.innerHTML = '<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Đã gửi kết quả thành công!</span>';
+                    }, function(error) {
+                        console.log('FAILED...', error);
+                        statusBox.innerHTML = `<span style="color:var(--danger)"><i class="fas fa-exclamation-triangle"></i> Lỗi gửi mail: ${JSON.stringify(error)}</span>`;
+                        alert("Không thể gửi mail. Vui lòng kiểm tra Template EmailJS hoặc Key.\nLỗi chi tiết: " + JSON.stringify(error));
+                    });
+            } else {
+                statusBox.innerHTML = '<span style="color:var(--danger)">Không có kết nối mạng để gửi mail.</span>';
+            }
+        }
+
+        function reviewExam() {
+            isReviewing = true;
+            document.getElementById('result-screen').style.display = 'none';
+            document.getElementById('exam-screen').style.display = 'flex';
+            
+            // Xóa nút Nộp bài
+            let oldBtn = document.querySelector('.btn-submit');
+            if(oldBtn) oldBtn.remove();
+
+            // Thêm nút Quay lại
+            let sidebar = document.querySelector('.sidebar');
+            let btnBack = document.createElement('button');
+            btnBack.className = 'btn-submit'; // Tái sử dụng class
+            btnBack.style.background = '#7f8c8d';
+            btnBack.innerText = "QUAY LẠI BẢNG ĐIỂM";
+            btnBack.onclick = backToResult;
+            sidebar.appendChild(btnBack);
+            
+            examData.forEach((q, idx) => {
+                let cell = document.getElementById(`cell-${idx}`); cell.classList.remove('current'); cell.innerHTML = idx + 1; 
+                if(userAnswers[idx] !== undefined) {
+                    if(q.options[userAnswers[idx]].isCorrect) cell.style.background = "#2ed573"; 
+                    else { cell.style.background = "#ff4757"; cell.style.color = "white"; }
+                } else cell.style.background = "#ffa502";
+            });
+            loadQuestion(0);
+        }
+
+        function backToResult() {
+            document.getElementById('exam-screen').style.display = 'none';
+            document.getElementById('result-screen').style.display = 'flex';
+        }
+
+        function startFireworks(score) {
+            const canvas = document.getElementById('fireworks'); const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            let particles = [];
+            
+            if(score < 5) {
+                document.getElementById('res-msg').innerText = "RẤT TIẾC, BẠN CHƯA ĐẠT YÊU CẦU"; document.getElementById('res-msg').style.color = "#ccc";
+                function Drop() { this.x = Math.random() * canvas.width; this.y = Math.random() * -canvas.height; this.dy = Math.random() * 5 + 2; this.draw = function() { ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.x, this.y + 10); ctx.strokeStyle = '#a4b0be'; ctx.stroke(); }; this.update = function() { this.y += this.dy; if(this.y > canvas.height) this.y = -10; } }
+                for(let i=0; i<100; i++) particles.push(new Drop());
+                function animateRain() { requestAnimationFrame(animateRain); ctx.clearRect(0,0,canvas.width, canvas.height); particles.forEach(p => { p.update(); p.draw(); }); }
+                animateRain();
+            } else {
+                function Particle(x, y, color) { this.x = x; this.y = y; this.color = color; this.velocity = { x: Math.random()*6-3, y: Math.random()*6-3 }; this.life = 100; this.alpha = 1; this.draw = function() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, 3, 0, Math.PI*2); ctx.fillStyle = this.color; ctx.fill(); ctx.restore(); }; this.update = function() { this.x += this.velocity.x; this.y += this.velocity.y; this.life--; this.alpha -= 0.01; } }
+                function animateFire() { requestAnimationFrame(animateFire); ctx.fillStyle = 'rgba(2, 16, 25, 0.2)'; ctx.fillRect(0,0,canvas.width, canvas.height);
+                    if(Math.random() < 0.05) { let x = Math.random() * canvas.width; let y = Math.random() * canvas.height/2; let c = `hsl(${Math.random()*360}, 100%, 50%)`; for(let i=0; i<40; i++) particles.push(new Particle(x, y, c)); }
+                    particles.forEach((p, i) => { p.update(); p.draw(); if(p.life <= 0) particles.splice(i, 1); });
+                }
+                animateFire();
+            }
+        }
+    </script>
+</body>
+</html>
