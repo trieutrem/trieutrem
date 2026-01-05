@@ -84,7 +84,7 @@
             background: white; 
             display: flex; 
             align-items: center; 
-            justify-content: space-between; /* Đẩy chữ và icon ra 2 bên */
+            justify-content: space-between; 
             font-size: 1.05rem; 
         }
         .option-item:hover { border-color: var(--primary); background: #f1fcff; }
@@ -132,46 +132,26 @@
 
         /* ================= MOBILE RESPONSIVE ================= */
         @media (max-width: 768px) {
-            /* Login */
             .login-card { padding: 30px 20px; }
             .brand-corner { font-size: 1.2rem; top: 15px; left: 15px; }
-
-            /* Header Mobile */
             .header { height: auto; padding: 10px 15px; flex-wrap: wrap; gap: 5px; }
             .header-title { width: 100%; text-align: center; order: 2; margin-top: 5px; }
             .header-title h1 { font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .header-title p { display: none; } 
             .timer-wrap { width: 100%; text-align: center; order: 1; }
             .timer-display { font-size: 1.5rem; }
-
-            /* Layout Mobile: Stack Column */
             .main-container { flex-direction: column; }
-            
-            /* Content Area Mobile */
-            .content-area { 
-                flex: 1; padding: 15px; 
-                padding-bottom: 10px; 
-            }
+            .content-area { flex: 1; padding: 15px; padding-bottom: 10px; }
             .question-card { padding: 20px; margin-bottom: 15px; }
             .q-text { font-size: 1.1rem; margin-bottom: 15px; }
             .option-item { padding: 12px; font-size: 1rem; }
-            
             .toolbar { margin-top: 0; }
             .btn-tool { flex: 1; justify-content: center; font-size: 0.9rem; padding: 10px; }
-
-            /* Sidebar Mobile (Bottom Panel) */
-            .sidebar {
-                width: 100%; max-width: none; border-left: none; border-top: 2px solid var(--primary);
-                height: 35vh; 
-                padding: 10px 15px;
-                flex: none; 
-            }
+            .sidebar { width: 100%; max-width: none; border-left: none; border-top: 2px solid var(--primary); height: 35vh; padding: 10px 15px; flex: none; }
             .student-card { padding: 8px 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
             .student-card div { margin-bottom: 0 !important; font-size: 0.9rem; }
-            
             .q-grid { grid-template-columns: repeat(8, 1fr); gap: 5px; } 
             .grid-cell { font-size: 0.8rem; }
-            
             .btn-submit { padding: 12px; margin-top: 5px; font-size: 1rem; }
         }
     </style>
@@ -251,7 +231,8 @@
                 <div style="font-size: 1rem;">ĐIỂM</div>
             </div>
             
-            <div id="mail-status" style="min-height: 40px; margin-bottom: 20px; font-style: italic; color: #7FDBFF;"></div>
+            <div id="mail-status" style="min-height: 20px; margin-bottom: 5px; font-style: italic;"></div>
+            <div id="sheet-status" style="min-height: 20px; margin-bottom: 20px; font-weight: bold; color: var(--accent);"></div>
             
             <div style="display: flex; flex-direction: column; gap: 10px;">
                 <button onclick="reviewExam()" style="padding: 12px; border-radius: 50px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer;">
@@ -283,21 +264,23 @@
     </div>
 
     <script>
-        // ========= CẤU HÌNH KEY EMAILJS =========
+        // ============================================
+        // 1. DÁN LINK "WEB APP URL" CỦA BẠN VÀO GIỮA DẤU NGOẶC KÉP DƯỚI ĐÂY:
+        const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxH6ZLL7aEgM7Tapnh-TO_N5kCr0l3-Dyu1xl4TNie6qA0a1ZJaOSYkv-um3L9nm4BRpg/exec"; 
+        // Ví dụ: const SHEET_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby.../exec";
+        // ============================================
+
         const EMAILJS_PUBLIC_KEY = "doXY7ihRmO41tP-M7";
         const EMAILJS_SERVICE_ID = "service_zqm8peo";
         const EMAILJS_TEMPLATE_ID = "template_t4y3jxa";
 
-        // Khởi tạo EmailJS
         (function(){
             try {
                 if(typeof emailjs !== 'undefined') {
                     emailjs.init(EMAILJS_PUBLIC_KEY);
-                    console.log("EmailJS Ready!");
                 }
             } catch(e) { console.warn("Lỗi EmailJS:", e); }
         })();
-        // ============================================
 
         const sourceData = [
             { q: '"Diễn biến hoà bình" là gì?', a: ["Là chiến lược cơ bản nhằm lật đổ chế độ chính quyền của các nước từ bên trong bằng biện pháp phi vũ trang", "Là chiến lược tấn công quân sự tổng lực", "Là chiến lược ngoại giao thân thiện", "Là hoạt động kinh tế đơn thuần"] },
@@ -428,7 +411,6 @@
                 let div = document.createElement('div'); 
                 div.className = 'option-item';
                 
-                // ĐÃ SỬA: Dùng thẻ span flex:1 để đẩy chữ không bị mất
                 let contentHTML = `<div class="badge">${String.fromCharCode(65+optIdx)}</div> <span style="flex: 1; margin-right: 10px; text-align: left;">${opt.txt}</span>`;
                 
                 if(userAnswers[idx] === optIdx) div.classList.add('selected');
@@ -508,7 +490,7 @@
         function closeAlert() { document.getElementById('popup-alert').style.display = 'none'; }
 
         // ============================================
-        // HÀM KẾT THÚC THI & GỬI EMAIL TỰ ĐỘNG
+        // HÀM KẾT THÚC THI - GỬI EMAIL & SHEET
         // ============================================
         function finishExam(auto=false) {
             clearInterval(timerInterval); 
@@ -528,40 +510,48 @@
             document.getElementById('final-score').innerText = score;
             startFireworks(score);
             
-            // XỬ LÝ GỬI EMAIL
-            const statusBox = document.getElementById('mail-status');
-            statusBox.innerHTML = '<span style="color:var(--accent)"><i class="fas fa-sync fa-spin"></i> Đang đồng bộ kết quả về hệ thống...</span>';
+            // XỬ LÝ GỬI DỮ LIỆU
+            const mailStatus = document.getElementById('mail-status');
+            const sheetStatus = document.getElementById('sheet-status');
+            
+            mailStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi Email...';
+            sheetStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu điểm vào Sheet...';
+            sheetStatus.style.color = "#ffa502";
 
             let timeNow = new Date().toLocaleString('vi-VN');
-            let detailMsg = `HỆ THỐNG THI TRẮC NGHIỆM - KẾT QUẢ\n\n` +
-                            `Thí sinh: ${studentName}\n` +
-                            `MSSV: ${studentID}\n` +
-                            `Thời gian nộp: ${timeNow}\n` +
-                            `--------------------------\n` +
-                            `SỐ CÂU ĐÚNG: ${correctCount}/50\n` +
-                            `TỔNG ĐIỂM: ${score}\n` +
-                            `--------------------------\n` +
-                            `Hệ thống tự động ghi nhận kết quả.`;
+            let detailMsg = `HỆ THỐNG THI TRẮC NGHIỆM - KẾT QUẢ\nThí sinh: ${studentName}\nMSSV: ${studentID}\nThời gian: ${timeNow}\nĐiểm: ${score}`;
 
-            let params = {
-                to_email: studentEmail,             
-                cc_email: "huakhaitrieustvol@gmail.com", 
-                name: studentName,
-                mssv: studentID,
-                score: score,
-                message: detailMsg
+            // 1. Gửi Email (EmailJS)
+            let emailParams = {
+                to_email: studentEmail, cc_email: "huakhaitrieustvol@gmail.com", 
+                name: studentName, mssv: studentID, score: score, message: detailMsg
             };
-
             if(typeof emailjs !== 'undefined') {
-                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
-                    .then(function(response) {
-                        statusBox.innerHTML = '<span style="color:var(--success)"><i class="fas fa-check-circle"></i> Đã gửi kết quả về Email thành công!</span>';
-                    }, function(error) {
-                        console.log('FAILED...', error);
-                        statusBox.innerHTML = `<span style="color:var(--danger)"><i class="fas fa-exclamation-triangle"></i> Lỗi gửi mail. Vui lòng chụp màn hình!</span>`;
+                emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, emailParams)
+                    .then(() => mailStatus.innerHTML = '<span style="color:#2ed573"><i class="fas fa-check"></i> Đã gửi Email</span>', 
+                          () => mailStatus.innerHTML = '<span style="color:#ff4757">Lỗi gửi Email</span>');
+            } else { mailStatus.innerHTML = 'Không có EmailJS'; }
+
+            // 2. Gửi Google Sheet (Fetch mode: no-cors)
+            if(SHEET_SCRIPT_URL && SHEET_SCRIPT_URL.startsWith('http')) {
+                // Tạo URL chứa tham số
+                let finalUrl = new URL(SHEET_SCRIPT_URL);
+                finalUrl.searchParams.append("name", studentName);
+                finalUrl.searchParams.append("mssv", studentID);
+                finalUrl.searchParams.append("email", studentEmail);
+                finalUrl.searchParams.append("score", score);
+                
+                // Gửi request
+                fetch(finalUrl, { method: "POST", mode: "no-cors" })
+                    .then(() => {
+                        sheetStatus.innerHTML = '<span style="color:#2ed573"><i class="fas fa-check-circle"></i> ĐÃ LƯU ĐIỂM VÀO SHEET!</span>';
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        sheetStatus.innerHTML = '<span style="color:#ff4757">Lỗi lưu Sheet!</span>';
                     });
             } else {
-                statusBox.innerHTML = '<span style="color:var(--danger)"><i class="fas fa-wifi"></i> Mất kết nối mạng. Không thể gửi mail.</span>';
+                sheetStatus.innerHTML = '<span style="color:#ccc">Chưa cài đặt Link Sheet!</span>';
             }
         }
 
